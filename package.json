@@ -1,5 +1,5 @@
 {
-  "name": "monaco",
+  "name": "idespike",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,8 +8,13 @@
     "start": "next start"
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.0.9",
+    "monaco-editor": "^0.22.3",
     "next": "10.0.6",
     "react": "17.0.1",
     "react-dom": "17.0.1"
+  },
+  "resolutions": {
+    "@monaco-editor/react/monaco-editor": "0.22.3"
   }
 }
