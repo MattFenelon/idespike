@@ -1,9 +1,29 @@
 import React, { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
-import Editor from "@monaco-editor/react";
+import MonacoEditor from "@monaco-editor/react";
+import { UnControlled as CodeMirror } from "react-codemirror2";
 
-const EDITOR_LOADING_STATE = {
+const AceEditor = dynamic(
+  async () => {
+    const ace = await import("react-ace");
+    await import("ace-builds/src-noconflict/mode-javascript");
+    await import("ace-builds/src-noconflict/theme-github");
+    return ace;
+  },
+  {
+    ssr: false
+  }
+);
+
+// dynamic(import("ace-builds/src-noconflict/mode-javascript"), { ssr: false });
+// dynamic(import("ace-builds/src-noconflict/theme-github"), { ssr: false });
+
+if (typeof navigator != typeof undefined)
+  require("codemirror/mode/javascript/javascript");
+
+const EDITOR_OPTIONS_LOADING_STATE = {
   value: "loading...",
   language: "javascript"
 };
@@ -12,7 +32,10 @@ export default function Home() {
   const [gameFile, setGameFile] = useState(null);
   const [testFile, setTestFile] = useState(null);
   const [activeFileName, changeActiveFileName] = useState("game.js");
-  const [editor, setEditor] = useState(EDITOR_LOADING_STATE);
+  const [editorOptions, setEditorOptions] = useState(
+    EDITOR_OPTIONS_LOADING_STATE
+  );
+  const [activeEditor, changeEditor] = useState("MonacoEditor");
 
   useEffect(() => {
     const fetchGameFile = async () => {
@@ -34,26 +57,27 @@ export default function Home() {
     switch (activeFileName) {
       case "game.js":
         if (gameFile)
-          setEditor({
+          setEditorOptions({
             path: "game.js",
             language: "javascript",
             value: gameFile
           });
-        else setEditor(EDITOR_LOADING_STATE);
+        else setEditorOptions(EDITOR_OPTIONS_LOADING_STATE);
         break;
       case "tests.js":
         if (testFile)
-          setEditor({
+          setEditorOptions({
             path: "tests.js",
             language: "javascript",
             value: testFile
           });
-        else setEditor(EDITOR_LOADING_STATE);
+        else setEditorOptions(EDITOR_OPTIONS_LOADING_STATE);
         break;
     }
   }, [activeFileName, gameFile, testFile]);
 
   const handleFileSelectChange = e => changeActiveFileName(e.target.value);
+  const handleEditorSelectChange = e => changeEditor(e.target.value);
 
   return (
     <div className={styles.container}>
@@ -67,12 +91,38 @@ export default function Home() {
           <option value="game.js">game.js</option>
           <option value="tests.js">tests.js</option>
         </select>
+        <select value={activeEditor} onChange={handleEditorSelectChange}>
+          <option value="MonacoEditor">MonacoEditor</option>
+          <option value="CodeMirror">CodeMirror</option>
+          <option value="ACE">ACE</option>
+        </select>
 
-        <Editor
-          path={editor.path}
-          defaultLanguage={editor.language}
-          defaultValue={editor.value}
-        />
+        {activeEditor == "MonacoEditor" && (
+          <MonacoEditor
+            path={editorOptions.path}
+            defaultLanguage={editorOptions.language}
+            defaultValue={editorOptions.value}
+          />
+        )}
+        {activeEditor == "CodeMirror" && (
+          <CodeMirror
+            value={editorOptions.value}
+            options={{
+              mode: editorOptions.language,
+              theme: "material",
+              lineNumbers: true
+            }}
+          />
+        )}
+        {activeEditor == "ACE" && (
+          <AceEditor
+            value={editorOptions.value}
+            mode={editorOptions.language}
+            theme="github"
+            height="100%"
+            width="100%"
+          />
+        )}
       </main>
 
       <footer className={styles.footer}>

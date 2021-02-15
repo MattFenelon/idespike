@@ -14,3 +14,15 @@ a {
 * {
   box-sizing: border-box;
 }
+
+@import "codemirror/lib/codemirror.css";
+@import "codemirror/theme/material.css";
+
+.CodeMirror {
+  border: 1px solid #eee;
+}
+
+.CodeMirror-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
